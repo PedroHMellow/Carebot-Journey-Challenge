@@ -1,7 +1,7 @@
 import { Text, View, ScrollView } from "react-native";
 import Header from "../../../components/Header";
 
-export default function home() {
+export default function perfil() {
   return (
     // 1. Usamos a View como container principal para segurar tudo
     <View className="flex-1 bg-white">
