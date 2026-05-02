@@ -1,5 +1,5 @@
 import { Text, View, ScrollView } from "react-native";
-import Header from "../../components/Header";
+import Header from "../../../components/Header";
 
 export default function home() {
   return (
@@ -12,7 +12,7 @@ export default function home() {
       {/* 3. O restante do seu conteúdo */}
       <View className="flex-1 items-center justify-center">
         <Text className="text-4xl text-purple-700 font-bold"> 
-           Home !!! 
+           Perfil !!! 
         </Text>
       </View>
 
