@@ -8,149 +8,113 @@ export interface User {
   createdAt: string;
 }
 
-const USERS_DB_KEY = "carebot_users_db";
+const USERS_DB_KEY = "@carebot_users_db";
+const CURRENT_USER_KEY = "@current_user";
 
-// Inicializar banco de dados com usuários de exemplo
+// Inicializar banco fake
 const initDatabase = async () => {
-  try {
-    const existingDB = await AsyncStorage.getItem(USERS_DB_KEY);
-    if (!existingDB) {
-      const initialDB = {
-        users: [
-          {
-            id: "1",
-            email: "teste@email.com",
-            password: "123456",
-            name: "Usuário Teste",
-            createdAt: new Date().toISOString(),
-          },
-        ],
-      };
-      await AsyncStorage.setItem(USERS_DB_KEY, JSON.stringify(initialDB));
-    }
-  } catch (error) {
-    console.log("Erro ao inicializar DB:", error);
+  const existing = await AsyncStorage.getItem(USERS_DB_KEY);
+
+  if (!existing) {
+    const initialDB = {
+      users: [
+        {
+          id: "1",
+          email: "teste@email.com",
+          password: "123456",
+          name: "Usuário Teste",
+          createdAt: new Date().toISOString(),
+        },
+      ],
+    };
+
+    await AsyncStorage.setItem(USERS_DB_KEY, JSON.stringify(initialDB));
   }
 };
 
-// Obter todos os usuários
+// Buscar usuários
 const getAllUsers = async (): Promise<User[]> => {
-  try {
-    await initDatabase();
-    const db = await AsyncStorage.getItem(USERS_DB_KEY);
-    if (db) {
-      const parsed = JSON.parse(db);
-      return parsed.users || [];
-    }
-    return [];
-  } catch (error) {
-    console.log("Erro ao obter usuários:", error);
-    return [];
-  }
+  await initDatabase();
+
+  const db = await AsyncStorage.getItem(USERS_DB_KEY);
+  if (!db) return [];
+
+  return JSON.parse(db).users || [];
 };
 
-// Verificar se email já existe
-const emailExists = async (email: string): Promise<boolean> => {
+// Login
+const login = async (email: string, password: string) => {
   const users = await getAllUsers();
-  return users.some((user) => user.email === email);
-};
 
-// Fazer login
-const login = async (
-  email: string,
-  password: string
-): Promise<{ success: boolean; user?: User; error?: string }> => {
-  try {
-    const users = await getAllUsers();
-    const user = users.find((u) => u.email === email);
+  const user = users.find((u) => u.email === email);
 
-    if (!user) {
-      return { success: false, error: "Usuário não encontrado" };
-    }
-
-    if (user.password !== password) {
-      return { success: false, error: "Senha incorreta" };
-    }
-
-    // Salvar sessão
-    await AsyncStorage.setItem("currentUser", JSON.stringify(user));
-    await AsyncStorage.setItem("userEmail", email);
-
-    return { success: true, user };
-  } catch (error) {
-    return { success: false, error: "Erro ao realizar login" };
+  if (!user) {
+    return { success: false, error: "Usuário não encontrado" };
   }
-};
 
-// Registrar novo usuário
-const register = async (
-  email: string,
-  password: string,
-  name: string
-): Promise<{ success: boolean; user?: User; error?: string }> => {
-  try {
-    // Validações
-    if (!email || !password || !name) {
-      return { success: false, error: "Todos os campos são obrigatórios" };
-    }
-
-    if (password.length < 6) {
-      return { success: false, error: "Senha deve ter no mínimo 6 caracteres" };
-    }
-
-    const exists = await emailExists(email);
-    if (exists) {
-      return { success: false, error: "Este e-mail já está registrado" };
-    }
-
-    // Criar novo usuário
-    const newUser: User = {
-      id: Date.now().toString(),
-      email,
-      password,
-      name,
-      createdAt: new Date().toISOString(),
-    };
-
-    // Adicionar ao banco de dados
-    const users = await getAllUsers();
-    users.push(newUser);
-
-    const db = {
-      users,
-    };
-
-    await AsyncStorage.setItem(USERS_DB_KEY, JSON.stringify(db));
-
-    // Salvar sessão
-    await AsyncStorage.setItem("currentUser", JSON.stringify(newUser));
-    await AsyncStorage.setItem("userEmail", email);
-
-    return { success: true, user: newUser };
-  } catch (error) {
-    return { success: false, error: "Erro ao registrar usuário" };
+  if (user.password !== password) {
+    return { success: false, error: "Senha incorreta" };
   }
+
+  // 🔥 salva sessão (PADRONIZADO)
+  await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+
+  return { success: true, user };
 };
 
-// Fazer logout
-const logout = async (): Promise<void> => {
-  try {
-    await AsyncStorage.removeItem("currentUser");
-    await AsyncStorage.removeItem("userEmail");
-  } catch (error) {
-    console.log("Erro ao fazer logout:", error);
+// Registro
+const register = async (email: string, password: string, name: string) => {
+  const users = await getAllUsers();
+
+  if (!email || !password || !name) {
+    return { success: false, error: "Preencha todos os campos" };
   }
+
+  if (password.length < 6) {
+    return { success: false, error: "Senha muito curta" };
+  }
+
+  const exists = users.some((u) => u.email === email);
+  if (exists) {
+    return { success: false, error: "Email já existe" };
+  }
+
+  const newUser: User = {
+    id: Date.now().toString(),
+    email,
+    password,
+    name,
+    createdAt: new Date().toISOString(),
+  };
+
+  const updated = [...users, newUser];
+
+  await AsyncStorage.setItem(
+    USERS_DB_KEY,
+    JSON.stringify({ users: updated })
+  );
+
+  // 🔥 login automático após cadastro
+  await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
+
+  return { success: true, user: newUser };
 };
 
-// Obter usuário atual
+// Logout
+const logout = async () => {
+  await AsyncStorage.removeItem(CURRENT_USER_KEY);
+};
+
+// Pegar usuário logado
 const getCurrentUser = async (): Promise<User | null> => {
-  try {
-    const user = await AsyncStorage.getItem("currentUser");
-    return user ? JSON.parse(user) : null;
-  } catch (error) {
-    console.log("Erro ao obter usuário atual:", error);
-    return null;
-  }
+  const user = await AsyncStorage.getItem(CURRENT_USER_KEY);
+  return user ? JSON.parse(user) : null;
+};
+
+// Verificar se está logado
+const isAuthenticated = async (): Promise<boolean> => {
+  const user = await getCurrentUser();
+  return !!user;
 };
 
 export const authService = {
@@ -158,6 +122,5 @@ export const authService = {
   register,
   logout,
   getCurrentUser,
-  getAllUsers,
-  emailExists,
+  isAuthenticated,
 };

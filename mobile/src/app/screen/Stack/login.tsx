@@ -52,15 +52,15 @@ export default function Login() {
       const result = await authService.login(email, password);
 
       if (result.success) {
-        Alert.alert("Sucesso", "Login realizado com sucesso!");
+        // Redirecionar sem alerta para evitar delay
         router.replace("/screen/Tabs/home");
       } else {
         Alert.alert("Erro", result.error || "Falha ao realizar login");
+        setLoading(false);
       }
     } catch (error) {
       Alert.alert("Erro", "Falha ao realizar login. Tente novamente.");
       console.log("Erro:", error);
-    } finally {
       setLoading(false);
     }
   };
@@ -130,18 +130,13 @@ export default function Login() {
           </View>
         </View>
 
-        {/* Forgot Password */}
-        <TouchableOpacity onPress={handleForgotPassword} className="mb-6">
-          <Text className="text-center text-blue-600 text-sm font-semibold">
-            Esqueceu sua senha?
-          </Text>
-        </TouchableOpacity>
+      
 
         {/* Login Button */}
         <TouchableOpacity
           onPress={handleLogin}
           disabled={loading}
-          className={`rounded-lg py-3 mb-6 ${
+          className={`rounded-lg py-3 mb-6 mt-3 ${
             loading ? "bg-blue-400" : "bg-blue-600"
           }`}
         >
