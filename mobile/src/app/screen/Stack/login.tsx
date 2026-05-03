@@ -79,7 +79,7 @@ export default function Login() {
         {/* Logo */}
         <View className="mb-8 items-center">
           <Image
-            source={require("../../../assets/images/Carebot Journey Logo.png")}
+            source={require("../../../assets/images/Carebot-Journey-Logo.png")}
             className="h-56 w-56"
             resizeMode="contain"
           />

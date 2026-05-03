@@ -89,7 +89,7 @@ export default function SignUp() {
         {/* Logo */}
         <View className="mb-6 items-center">
           <Image
-            source={require("../../../assets/images/Carebot Journey Logo.png")}
+            source={require("../../../assets/images/Carebot-Journey-Logo.png")}
             className="h-40 w-56"
             resizeMode="contain"
           />
