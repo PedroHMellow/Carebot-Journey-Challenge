@@ -1,21 +1,5 @@
-import { Text, View, ScrollView } from "react-native";
-import Header from "../../../components/Header";
+import { Redirect } from "expo-router";
 
-export default function dashbord() {
-  return (
-    // 1. Usamos a View como container principal para segurar tudo
-    <View className="flex-1 bg-[#E6F0F8]">
-      
-      {/* 2. Chamada correta do componente (self-closing tag) */}
-      <Header userName="Pedro" />
-
-      {/* 3. O restante do seu conteúdo */}
-      <View className="flex-1 items-center justify-center">
-        <Text className="text-4xl text-purple-700 font-poppinsBold"> 
-           Dashbord !!! 
-        </Text>
-      </View>
-
-    </View>
-  );
+export default function Dashbord() {
+  return <Redirect href="/screen/Tabs/missoes" />;
 }

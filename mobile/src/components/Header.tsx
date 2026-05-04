@@ -38,7 +38,7 @@ export default function Header({ userName = "Pedro" }: HeaderProps) {
   };
 
   // Cálculo de progresso para a barra (em porcentagem)
-  const progressPercentage: string = `${(dailyMission.currentValue / dailyMission.goalValue) * 100}%`;
+  const progressPercentage = `${(dailyMission.currentValue / dailyMission.goalValue) * 100}%` as `${number}%`;
 
   return (
     <View 
