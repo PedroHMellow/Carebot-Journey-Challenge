@@ -79,7 +79,7 @@ export default function SignUp() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-white">
+    <ScrollView className="flex-1 bg-[#E6F0F8]">
       <View className="flex-1 px-6 pt-12 pb-10">
         {/* Back Button */}
         <TouchableOpacity onPress={handleBackToLogin} className="mb-6">

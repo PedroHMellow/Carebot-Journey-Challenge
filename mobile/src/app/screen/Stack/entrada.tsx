@@ -3,10 +3,9 @@ import { Link } from "expo-router";
 
 export default function entrada() {
   return (
-    // Container principal: Centraliza tudo e define o fundo azul claro
+  
     <View className="flex-1 bg-[#E6F0F8] items-center justify-center p-6">
-      
-      {/* 1. Imagem do Logo */}
+     
       <View className="items-center">
         <Image
           source={require("../../../assets/images/Carebot-Journey-Icon.png")}
@@ -25,7 +24,7 @@ export default function entrada() {
           </Text>
         </Text>
 
-        <Text className="text-lg text-[#0D1658] text-center font-medium leading-6 mb-8">
+        <Text className="text-lg text-[#0D1658] text-center font-poppinsBold leading-6 mb-8">
           Pequenas escolhas constroem{"\n"}
           uma vida mais saudável.{"\n"}
         </Text>

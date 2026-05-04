@@ -74,7 +74,7 @@ export default function Login() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-white">
+    <ScrollView className="flex-1 bg-[#E6F0F8]">
       <View className="flex-1 px-6 pt-16 pb-10">
         {/* Logo */}
         <View className="mb-8 items-center">
