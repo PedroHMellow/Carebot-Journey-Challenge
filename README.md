@@ -44,9 +44,8 @@ Abra o **Expo Go** no seu celular e escaneie o QR Code.
 | Hábitos | Histórico semanal de hábitos com consistência |
 | Agendamentos | Consultas agendadas com lembretes por notificação |
 | Perfil | Dados do usuário, estatísticas e configurações |
-
-Link pra Demonstração: 
-[text](https://youtube.com/shorts/vSyAzmTzPso)
+ 
+[Link pra Demonstração](https://youtube.com/shorts/vSyAzmTzPso)
 
 ---
 
