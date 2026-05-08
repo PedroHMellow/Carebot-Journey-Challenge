@@ -3,6 +3,12 @@
 Aplicativo mobile de saúde e bem-estar desenvolvido com **React Native + Expo**, focado em incentivar hábitos saudáveis, acompanhar missões diárias e integrar dados de sensores IoT em tempo real.
 
 ---
+Integrantes
+- rm553187 - Gabriel Borba
+- rm553842 - Gustavo Gouvêa Soares
+- rm553945 - Henrique Rafael Gomes de Souza
+- rm554223 - Pedro Henrique Mello Silva Alves
+---
 
 ## Como executar
 
@@ -38,6 +44,9 @@ Abra o **Expo Go** no seu celular e escaneie o QR Code.
 | Hábitos | Histórico semanal de hábitos com consistência |
 | Agendamentos | Consultas agendadas com lembretes por notificação |
 | Perfil | Dados do usuário, estatísticas e configurações |
+
+Link pra Demonstração: 
+[text](https://youtube.com/shorts/vSyAzmTzPso)
 
 ---
 
