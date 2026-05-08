@@ -3,7 +3,7 @@
 Aplicativo mobile de saúde e bem-estar desenvolvido com **React Native + Expo**, focado em incentivar hábitos saudáveis, acompanhar missões diárias e integrar dados de sensores IoT em tempo real.
 
 ---
-Integrantes
+## Integrantes
 - rm553187 - Gabriel Borba
 - rm553842 - Gustavo Gouvêa Soares
 - rm553945 - Henrique Rafael Gomes de Souza
