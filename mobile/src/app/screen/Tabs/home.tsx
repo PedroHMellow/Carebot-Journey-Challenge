@@ -51,6 +51,7 @@ export default function Home() {
   const [dailyMission, setDailyMission] = useState<Mission | null>(null);
   const [iotData, setIotData] = useState<IoTData>(iotService.getLastReading());
   const [realtimeConnected, setRealtimeConnected] = useState(false);
+  const [lastEvent, setLastEvent] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -61,13 +62,31 @@ export default function Home() {
     setDailyMission(water);
   }, []);
 
+  const formatRealtimeEvent = useCallback((event: RealtimeEvent) => {
+    switch (event.type) {
+      case 'iot-data': {
+        const payload = event.payload as Record<string, unknown>;
+        return `IoT → Água ${payload.waterIntake ?? '-'}L · Passos ${payload.steps ?? '-'} · BPM ${payload.heartRate ?? '-'}`;
+      }
+      case 'mission-update':
+        return `Missão atualizada: ${event.payload.missionId ?? 'desconhecida'}`;
+      case 'achievement':
+        return `Conquista: ${event.payload.message ?? 'Novo objetivo!'}`;
+      case 'notification':
+        return `Notificação: ${event.payload.message ?? 'Nova mensagem'}`;
+      default:
+        return 'Evento em tempo real recebido';
+    }
+  }, []);
+
   const handleRealtimeEvent = useCallback(
     async (event: RealtimeEvent) => {
+      setLastEvent(formatRealtimeEvent(event));
       if (event.type === "iot-data") {
         await handleIoTUpdate(event.payload as unknown as IoTData);
       }
     },
-    [handleIoTUpdate],
+    [formatRealtimeEvent, handleIoTUpdate],
   );
 
   useEffect(() => {
@@ -195,6 +214,25 @@ export default function Home() {
             >
               {realtimeConnected ? "Sensor conectado" : "Conectando sensor..."}
             </Text>
+          </View>
+
+          <View
+            style={
+              realtimeConnected
+                ? styles.realtimeBannerOnline
+                : styles.realtimeBannerOffline
+            }
+          >
+            <Text style={styles.realtimeBannerTitle}>
+              {realtimeConnected
+                ? 'Conectado ao servidor Socket.IO'
+                : 'Tentando reconectar...'}
+            </Text>
+            {lastEvent ? (
+              <Text style={styles.realtimeBannerText}>{lastEvent}</Text>
+            ) : (
+              <Text style={styles.realtimeBannerText}>Aguardando primeiros eventos...</Text>
+            )}
           </View>
         </View>
       </View>
@@ -347,6 +385,34 @@ const styles = StyleSheet.create({
     backgroundColor: "#EF4444",
     borderWidth: 1.5,
     borderColor: "#005EBB",
+  },
+
+  realtimeBannerOnline: {
+    backgroundColor: '#EDF8FF',
+    padding: 12,
+    borderRadius: 14,
+    marginTop: 14,
+    borderWidth: 1,
+    borderColor: '#BEE3F8',
+  },
+  realtimeBannerOffline: {
+    backgroundColor: '#F8FAFB',
+    padding: 12,
+    borderRadius: 14,
+    marginTop: 14,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+  },
+  realtimeBannerTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 4,
+  },
+  realtimeBannerText: {
+    fontSize: 12,
+    color: '#475569',
+    lineHeight: 18,
   },
 
   missionCard: {

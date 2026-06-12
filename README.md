@@ -13,18 +13,23 @@ Aplicativo mobile de saúde e bem-estar desenvolvido com **React Native + Expo**
 ## Como executar
 
 ```bash
-# 1. Instalar dependências
-cd mobile
+# 1. Iniciar o servidor Socket.IO local
+cd socket-server
+npm install
+npm start
+
+# 2. Instalar dependências do app mobile
+cd ../mobile
 npm install
 
-# 2. Iniciar o servidor de desenvolvimento
+# 3. Iniciar o servidor de desenvolvimento Expo
 npx expo start
 
-# Caso o celular não conecte ao servidor via rede local (erro de 127.0.0.1 ou timeout), 
+# Caso o celular não conecte ao servidor via rede local (erro de 127.0.0.1 ou timeout),
 # utilize o modo tunnel para criar uma conexão externa:
 npx expo start --tunnel
 
-# 3. Limpar cache (se necessário)
+# 4. Limpar cache (se necessário)
 npx expo start -c
 ```
 
@@ -60,6 +65,7 @@ Abra o **Expo Go** no seu celular e escaneie o QR Code.
 - **Expo Router** (file-based routing)
 - **NativeWind v4** (Tailwind CSS para React Native)
 - **AsyncStorage** (persistência local)
+- **socket.io-client** (comunicação em tempo real)
 - **expo-notifications** (notificações push nativas)
 - **expo-device** (detecção de dispositivo físico)
 
@@ -95,11 +101,12 @@ Abra o **Expo Go** no seu celular e escaneie o QR Code.
 
 ## Funcionalidades — Sprint 4
 
-### Comunicação em Tempo Real (WebSocket)
-- `RealtimeService` com padrão EventEmitter simulando WebSocket
+### Comunicação em Tempo Real (Socket.IO)
+- `RealtimeService` com `socket.io-client` conectado a um servidor Socket.IO local
 - Conecta ao iniciar a tela Home e desconecta ao sair
-- Emite eventos: `iot-data`, `mission-update`, `achievement`, `notification`
-- A UI da Home e Missões se atualiza automaticamente ao receber eventos
+- Recebe eventos em tempo real: `iot-data`, `mission-update`, `achievement`, `notification`
+- A UI da Home e Missões se atualiza automaticamente ao receber dados
+- A Home exibe status de conexão Socket.IO e mensagens dos eventos mais recentes
 
 ### Funcionalidade Nativa — Notificações Push
 - Integração com **`expo-notifications`**

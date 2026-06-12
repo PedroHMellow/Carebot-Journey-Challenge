@@ -1,0 +1,11 @@
+{
+  "name": "carebot-socket-server",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "socket.io": "^4.8.1"
+  }
+}

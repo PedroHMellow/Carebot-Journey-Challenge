@@ -19,6 +19,7 @@ export default function Missoes() {
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [loading, setLoading] = useState(true);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [socketConnected, setSocketConnected] = useState(false);
 
   const loadData = useCallback(async () => {
     try {
@@ -55,7 +56,12 @@ export default function Missoes() {
       realtimeService.off("iot-data", handleRealtimeEvent);
     };
   }, [loadData, handleRealtimeEvent]);
-
+  useEffect(() => {
+    realtimeService.onConnectionChange(setSocketConnected);
+    return () => {
+      realtimeService.offConnectionChange(setSocketConnected);
+    };
+  }, []);
   const handleToggle = async (mission: Mission) => {
     setTogglingId(mission.id);
     try {
@@ -154,9 +160,19 @@ export default function Missoes() {
 
             {/* Título lista */}
             <View style={styles.missionListHeader}>
-              <Text style={styles.sectionTitle}>Missões da semana</Text>
-              <Text style={styles.missionCount}>
-                {completedCount} de {missions.length} concluídas
+              <View>
+                <Text style={styles.sectionTitle}>Missões da semana</Text>
+                <Text style={styles.missionCount}>
+                  {completedCount} de {missions.length} concluídas
+                </Text>
+              </View>
+              <Text
+                style={[
+                  styles.realtimeStatus,
+                  socketConnected ? styles.realtimeStatusOnline : styles.realtimeStatusOffline,
+                ]}
+              >
+                {socketConnected ? 'Online em tempo real' : 'Reconectando...'}
               </Text>
             </View>
           </>
@@ -314,6 +330,16 @@ const styles = StyleSheet.create({
   },
   sectionTitle: { fontSize: 16, fontWeight: "700", color: "#1A1F2B" },
   missionCount: { fontSize: 12, color: "#64748B" },
+  realtimeStatus: {
+    fontSize: 11,
+    fontWeight: "700",
+  },
+  realtimeStatusOnline: {
+    color: "#10B981",
+  },
+  realtimeStatusOffline: {
+    color: "#F59E0B",
+  },
 
   missionCard: {
     backgroundColor: "#FFFFFF",
