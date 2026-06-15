@@ -6,10 +6,12 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
+  Image,
 } from "react-native";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import { authService, User } from "../../../service/auth";
 import { missionsService } from "../../../service/missions";
 import { notificationsService } from "../../../service/notifications";
@@ -51,6 +53,7 @@ export default function Perfil() {
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const router = useRouter();
 
   const loadData = useCallback(async () => {
@@ -98,6 +101,52 @@ export default function Perfil() {
     );
   };
 
+  const handlePickAvatar = () => {
+    Alert.alert("Foto de perfil", "Escolha uma opção", [
+      {
+        text: "Câmera",
+        onPress: async () => {
+          const { status } = await ImagePicker.requestCameraPermissionsAsync();
+          if (status !== "granted") {
+            Alert.alert(
+              "Permissão negada",
+              "Ative o acesso à câmera nas configurações do dispositivo."
+            );
+            return;
+          }
+          const result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.7,
+          });
+          if (!result.canceled) setAvatarUri(result.assets[0].uri);
+        },
+      },
+      {
+        text: "Galeria",
+        onPress: async () => {
+          const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+          if (status !== "granted") {
+            Alert.alert(
+              "Permissão negada",
+              "Ative o acesso à galeria nas configurações do dispositivo."
+            );
+            return;
+          }
+          const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.7,
+          });
+          if (!result.canceled) setAvatarUri(result.assets[0].uri);
+        },
+      },
+      { text: "Cancelar", style: "cancel" },
+    ]);
+  };
+
   const handleNotifications = async () => {
     const granted = await notificationsService.requestPermissions();
     if (granted) {
@@ -128,12 +177,16 @@ export default function Perfil() {
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.avatarWrap}>
-          <MaterialCommunityIcons name="account-circle" color="#FFFFFF" size={72} />
-          <TouchableOpacity style={styles.avatarEdit}>
+        <TouchableOpacity style={styles.avatarWrap} onPress={handlePickAvatar} activeOpacity={0.8}>
+          {avatarUri ? (
+            <Image source={{ uri: avatarUri }} style={styles.avatarImage} />
+          ) : (
+            <MaterialCommunityIcons name="account-circle" color="#FFFFFF" size={72} />
+          )}
+          <View style={styles.avatarEdit}>
             <MaterialCommunityIcons name="camera" color="#005EBB" size={16} />
-          </TouchableOpacity>
-        </View>
+          </View>
+        </TouchableOpacity>
         <Text style={styles.userName}>{user?.name ?? "Usuário"}</Text>
         <Text style={styles.userEmail}>{user?.email ?? ""}</Text>
 
@@ -283,6 +336,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   avatarWrap: { position: "relative", marginBottom: 12 },
+  avatarImage: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    borderWidth: 2,
+    borderColor: "#FFFFFF",
+  },
   avatarEdit: {
     position: "absolute",
     bottom: 2,

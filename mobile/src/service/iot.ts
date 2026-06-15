@@ -1,6 +1,7 @@
 import { IoTData } from '../types';
 
 const IOT_SENSOR_ENDPOINT = 'https://httpbin.org/post';
+const DEVICE_TOKEN = process.env.EXPO_PUBLIC_IOT_DEVICE_TOKEN ?? 'carebot-iot-v1';
 
 let cachedReading: IoTData = {
   deviceId: 'smart-bottle-001',
@@ -22,7 +23,7 @@ const fetchSensorData = async (): Promise<IoTData> => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Device-Token': 'carebot-iot-v1',
+        'X-Device-Token': DEVICE_TOKEN,
       },
       body,
     });
@@ -43,10 +44,7 @@ const fetchSensorData = async (): Promise<IoTData> => {
 
     return cachedReading;
   } catch {
-    return {
-      ...cachedReading,
-      timestamp: Date.now(),
-    };
+    return { ...cachedReading, timestamp: Date.now() };
   }
 };
 

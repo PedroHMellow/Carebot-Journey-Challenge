@@ -1,17 +1,20 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 
 export interface User {
   id: string;
   email: string;
-  password: string;
   name: string;
   createdAt: string;
 }
 
-const USERS_DB_KEY = "@carebot_users_db";
-const CURRENT_USER_KEY = "@current_user";
+interface StoredUser extends User {
+  password: string;
+}
 
-// Inicializar banco fake
+const USERS_DB_KEY = "@carebot_users_db";
+const CURRENT_USER_KEY = "carebot_current_user";
+
 const initDatabase = async () => {
   const existing = await AsyncStorage.getItem(USERS_DB_KEY);
 
@@ -32,54 +35,45 @@ const initDatabase = async () => {
   }
 };
 
-// Buscar usuários
-const getAllUsers = async (): Promise<User[]> => {
+const getAllUsers = async (): Promise<StoredUser[]> => {
   await initDatabase();
-
   const db = await AsyncStorage.getItem(USERS_DB_KEY);
   if (!db) return [];
-
   return JSON.parse(db).users || [];
 };
 
-// Login
+const toPublicUser = (u: StoredUser): User => ({
+  id: u.id,
+  email: u.email,
+  name: u.name,
+  createdAt: u.createdAt,
+});
+
 const login = async (email: string, password: string) => {
   const users = await getAllUsers();
-
   const user = users.find((u) => u.email === email);
 
-  if (!user) {
-    return { success: false, error: "Usuário não encontrado" };
-  }
+  if (!user) return { success: false, error: "Usuário não encontrado" };
+  if (user.password !== password) return { success: false, error: "Senha incorreta" };
 
-  if (user.password !== password) {
-    return { success: false, error: "Senha incorreta" };
-  }
+  const publicUser = toPublicUser(user);
+  await SecureStore.setItemAsync(CURRENT_USER_KEY, JSON.stringify(publicUser));
 
-  // 🔥 salva sessão (PADRONIZADO)
-  await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
-
-  return { success: true, user };
+  return { success: true, user: publicUser };
 };
 
-// Registro
 const register = async (email: string, password: string, name: string) => {
   const users = await getAllUsers();
 
-  if (!email || !password || !name) {
+  if (!email || !password || !name)
     return { success: false, error: "Preencha todos os campos" };
-  }
-
-  if (password.length < 6) {
+  if (password.length < 6)
     return { success: false, error: "Senha muito curta" };
-  }
 
   const exists = users.some((u) => u.email === email);
-  if (exists) {
-    return { success: false, error: "Email já existe" };
-  }
+  if (exists) return { success: false, error: "Email já existe" };
 
-  const newUser: User = {
+  const newUser: StoredUser = {
     id: Date.now().toString(),
     email,
     password,
@@ -87,31 +81,26 @@ const register = async (email: string, password: string, name: string) => {
     createdAt: new Date().toISOString(),
   };
 
-  const updated = [...users, newUser];
-
   await AsyncStorage.setItem(
     USERS_DB_KEY,
-    JSON.stringify({ users: updated })
+    JSON.stringify({ users: [...users, newUser] })
   );
 
-  // 🔥 login automático após cadastro
-  await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
+  const publicUser = toPublicUser(newUser);
+  await SecureStore.setItemAsync(CURRENT_USER_KEY, JSON.stringify(publicUser));
 
-  return { success: true, user: newUser };
+  return { success: true, user: publicUser };
 };
 
-// Logout
 const logout = async () => {
-  await AsyncStorage.removeItem(CURRENT_USER_KEY);
+  await SecureStore.deleteItemAsync(CURRENT_USER_KEY);
 };
 
-// Pegar usuário logado
 const getCurrentUser = async (): Promise<User | null> => {
-  const user = await AsyncStorage.getItem(CURRENT_USER_KEY);
+  const user = await SecureStore.getItemAsync(CURRENT_USER_KEY);
   return user ? JSON.parse(user) : null;
 };
 
-// Verificar se está logado
 const isAuthenticated = async (): Promise<boolean> => {
   const user = await getCurrentUser();
   return !!user;

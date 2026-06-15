@@ -5,7 +5,9 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  ActivityIndicator,
 } from "react-native";
+import { useState, useEffect } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { notificationsService } from "../../../service/notifications";
 import { Appointment } from "../../../types";
@@ -57,6 +59,27 @@ const TYPE_COLORS: Record<string, string> = {
 };
 
 export default function Agendamentos() {
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadAppointments = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        await new Promise((resolve) => setTimeout(resolve, 800));
+        setAppointments(APPOINTMENTS);
+      } catch {
+        setError("Não foi possível carregar os agendamentos.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadAppointments();
+  }, []);
+
   const handleReminder = async (appointment: Appointment) => {
     try {
       const hasPermission = await notificationsService.requestPermissions();
@@ -79,10 +102,41 @@ export default function Agendamentos() {
     }
   };
 
+  if (loading) {
+    return (
+      <View style={styles.centeredContainer}>
+        <ActivityIndicator size="large" color="#005EBB" />
+        <Text style={styles.centeredText}>Carregando agendamentos...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centeredContainer}>
+        <MaterialCommunityIcons name="alert-circle-outline" color="#EF4444" size={48} />
+        <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity
+          style={styles.retryBtn}
+          onPress={() => {
+            setLoading(true);
+            setError(null);
+            setTimeout(() => {
+              setAppointments(APPOINTMENTS);
+              setLoading(false);
+            }, 800);
+          }}
+        >
+          <Text style={styles.retryText}>Tentar novamente</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <FlatList
-        data={APPOINTMENTS}
+        data={appointments}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
@@ -275,4 +329,28 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   emptyText: { fontSize: 15, color: "#94A3B8" },
+
+  centeredContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F8FAFC",
+    gap: 12,
+    paddingHorizontal: 32,
+  },
+  centeredText: { fontSize: 14, color: "#64748B", marginTop: 8 },
+  errorText: {
+    fontSize: 14,
+    color: "#EF4444",
+    textAlign: "center",
+    marginTop: 8,
+  },
+  retryBtn: {
+    marginTop: 8,
+    backgroundColor: "#005EBB",
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryText: { color: "#FFFFFF", fontWeight: "600", fontSize: 14 },
 });
